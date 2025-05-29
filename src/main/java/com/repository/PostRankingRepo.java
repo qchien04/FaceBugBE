@@ -18,10 +18,10 @@ import java.util.List;
 public interface PostRankingRepo extends JpaRepository<PostRanking,Integer> {
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM post_ranking WHERE time_calculator < NOW() - INTERVAL 6 DAY", nativeQuery = true)
+    @Query(value = "DELETE FROM post_ranking WHERE time_calculator < NOW() - INTERVAL '6 days'", nativeQuery = true)
     void deleteOlderThan6Days();
 
-    @Query(value = "SELECT COUNT(*) FROM post_ranking WHERE time_calculator > NOW() - INTERVAL 6 DAY", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM post_ranking WHERE time_calculator > NOW() - INTERVAL '6 days'", nativeQuery = true)
     int countEligiblePosts();
 
     @Query(value = """   
@@ -29,7 +29,7 @@ public interface PostRankingRepo extends JpaRepository<PostRanking,Integer> {
     FROM post_ranking p
     JOIN post po ON po.id=p.post
     JOIN userprofile u ON u.user_id=po.author_id
-    WHERE p.time_calculator > NOW() - INTERVAL 6 DAY AND u.account_type='PAGE'
+    WHERE p.time_calculator > NOW() - INTERVAL '6 days' AND u.account_type='PAGE'
     LIMIT 10 OFFSET :offset
     """, nativeQuery = true)
     List<Integer> findRecommendedPosts(@Param("offset") int offset);
