@@ -1,0 +1,78 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Build Output
+out/
+build/
+
+# Logs
+logs/
+*.log
+hs_err_pid*.log
+
+# Dependency Caches
+.mvn/
+*.jar
+*.war
+*.ear
+
+# Spring Boot - sensitive config (DO NOT TRACK these)
+.env
+.env.*
+application-secret.properties
+application-*.yml
+application-*.yaml
+secrets.env
+
+# ✅ Keep this file — cleaned version pushed safely
+# If you want to push it, REMOVE from ignore list (uncomment below)
+# !application.properties
+# !application.yml
+# !application.yaml
+
+# IDE / Editors
+## IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+## Eclipse
+*.metadata
+*.classpath
+*.project
+/.settings/
+
+## VS Code
+.vscode/
+
+## STS (Spring Tool Suite)
+.apt_generated
+.factorypath
+.springBeans
+.sts4-cache
+
+## NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# OS Specific Files
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+
+# Docker
+.dockerignore
+**/docker-data/
+**/docker-volumes/
+**/docker-logs/
+
+# If you want to push docker files — uncomment the lines below:
+# !Dockerfile
+# !docker-compose.yml
+# !docker-compose.override.yml
