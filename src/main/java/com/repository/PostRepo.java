@@ -3,7 +3,6 @@ package com.repository;
 import com.constant.CategoryContent;
 import com.constant.MediaType;
 import com.entity.Post;
-import com.entity.auth.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +15,7 @@ import java.util.Optional;
 
 @Repository
 public interface PostRepo extends JpaRepository<Post,Integer> {
+    Optional<Post> findById(Integer id);
 
     @Query("SELECT p FROM Post p JOIN FETCH p.author WHERE p.author.id=:userId AND p.type=PostType.PERSONAL ORDER BY p.createdAt DESC")
     Page<Post> findAllWithAuthorId(@Param("userId") Integer userId, Pageable pageable);

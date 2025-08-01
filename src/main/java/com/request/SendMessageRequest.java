@@ -1,6 +1,7 @@
 package com.request;
 
 
+import com.constant.MessageType;
 import com.entity.chatrealtime.Message;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -22,8 +23,9 @@ public class SendMessageRequest {
     private LocalDateTime timeSend;
     private Integer conversationId;
     private String imageUrl;
-    private Message.MessageType messageType;
+    private MessageType messageType;
     private List<Integer> receiveIds;
+    private Boolean typing;
 
     @Override
     public String toString() {

@@ -2,15 +2,15 @@ package com.controller.chatrealtime;
 
 import com.DTO.MessageNotifyDTO;
 import com.config.CustomPrincipalChat;
+import com.constant.MessageType;
 import com.entity.auth.UserProfile;
 import com.entity.chatrealtime.Conversation;
 import com.entity.chatrealtime.Message;
 import com.entity.chatrealtime.MessageNotify;
 import com.exception.ConversationException;
+import com.exception.MessageException;
 import com.request.SendMessageRequest;
-import com.request.TypingPayload;
-import com.service.CustomUserDetails;
-import com.service.SseService;
+
 import com.service.UpLoadImageFileService;
 import com.service.chatrealtime.ConversationService;
 import com.service.chatrealtime.MessageNotifyService;
@@ -21,12 +21,10 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -50,8 +48,6 @@ public class ChatRealTimeController {
     @Autowired
     private MessageNotifyService messageNotifyService;
 
-    @Autowired
-    private SseService sseService;
 
     @MessageMapping("/news")
     @SendTo("/topic/news")
@@ -62,33 +58,33 @@ public class ChatRealTimeController {
 
     @MessageMapping("/sendMessage")
     public void broadcast(@Payload SendMessageRequest sendMessageRequest, Principal principal) {
+
         if (principal == null) {
            throw new ConversationException("Something went wrong");
         }
 
-        String username = principal.getName();
-        System.out.println("Tên người dùng: " + username);
         if (principal instanceof CustomPrincipalChat principalChat) {
-            System.out.println("Các kênh đã đăng ký:");
-            principalChat.getSubscribedChannels().forEach(System.out::println);
-            Set<Integer> channels = principalChat.getSubscribedChannels();
-
-            if (!channels.isEmpty()) {
-                Integer firstChannel = channels.iterator().next();
-                System.out.println("Kênh đầu tiên: " + firstChannel);
-                sendMessageRequest.setConversationId(firstChannel);
+            if (!principalChat.inChannel(sendMessageRequest.getConversationId())) {
+                throw new MessageException("User not permission with this room have id:"+sendMessageRequest.getConversationId()+"!");
             }
 
         } else {
-            System.out.println("Principal không phải kiểu CustomPrincipalChat");
+            throw new MessageException("User not valid!");
         }
-        boolean isImage=sendMessageRequest.getMessageType().equals(Message.MessageType.IMAGE);
+
+        // typing action
+        if(sendMessageRequest.getTyping()){
+            messagingTemplate.convertAndSend("/conversation/" + sendMessageRequest.getConversationId(), sendMessageRequest);
+            return;
+        }
+
+        boolean isImage=sendMessageRequest.getMessageType().equals(MessageType.IMAGE);
         if(!isImage){
             messagingTemplate.convertAndSend("/conversation/" + sendMessageRequest.getConversationId(),
                                             sendMessageRequest);
             Message newMessage=new Message();
             newMessage.setSender(UserProfile.builder().id(sendMessageRequest.getSenderId()).build());
-            newMessage.setMessageType(Message.MessageType.TEXT);
+            newMessage.setMessageType(MessageType.TEXT);
             newMessage.setTimeSend(LocalDateTime.now());
             newMessage.setConversation(Conversation.builder().id(sendMessageRequest.getConversationId()).build());
             newMessage.setContent(sendMessageRequest.getContent());
@@ -100,7 +96,6 @@ public class ChatRealTimeController {
             newMessage=messageService.createMessage(newMessage);
             //update last message
             conversationService.updatePreviewonversation(sendMessageRequest.getConversationId(),
-                                                        sendMessageRequest.getSenderId(),
                                                         newMessage.getId());
 
             //luu tin nhan
@@ -124,7 +119,7 @@ public class ChatRealTimeController {
                     String content=sendMessageRequest.getContent().trim();
                     if(!content.isEmpty()){
 
-                        newMessage.setMessageType(Message.MessageType.TEXT);
+                        newMessage.setMessageType(MessageType.TEXT);
                         newMessage.setContent(sendMessageRequest.getContent());
 
                         messagingTemplate.convertAndSend("/conversation/" + sendMessageRequest.getConversationId(),
@@ -137,14 +132,13 @@ public class ChatRealTimeController {
                         newMessage=messageService.createMessage(newMessage);
                         //update last message
                         conversationService.updatePreviewonversation(sendMessageRequest.getConversationId(),
-                                sendMessageRequest.getSenderId(),
                                 newMessage.getId());
                     }
 
                     //Gui link anh
                     System.out.println(url);
 
-                    newMessage.setMessageType(Message.MessageType.IMAGE);
+                    newMessage.setMessageType(MessageType.IMAGE);
                     newMessage.setContent(url);
 
                     messagingTemplate.convertAndSend("/conversation/" + sendMessageRequest.getConversationId(),
@@ -158,7 +152,6 @@ public class ChatRealTimeController {
                     newMessage=messageService.createMessage(newMessage);
                     //update last message
                     conversationService.updatePreviewonversation(sendMessageRequest.getConversationId(),
-                            sendMessageRequest.getSenderId(),
                             newMessage.getId());
                 }
 
@@ -170,15 +163,9 @@ public class ChatRealTimeController {
     }
 
 
-    @MessageMapping("/typing")
-    public void typing(@Payload TypingPayload typingPayload) {
-        System.out.println(typingPayload);
-        messagingTemplate.convertAndSend("/typing/" + typingPayload.getConversationId(), typingPayload);
-    }
-
-
     public void SaveAndSendMessageNotify(SendMessageRequest sendMessageRequest,Boolean isImage){
         for(Integer i:sendMessageRequest.getReceiveIds()){
+            System.out.println(i+"ne");
             MessageNotify mn=new MessageNotify();
             mn.setSenderId(sendMessageRequest.getSenderId());
             mn.setConversationId(sendMessageRequest.getConversationId());
@@ -194,7 +181,7 @@ public class ChatRealTimeController {
                     .senderName(sendMessageRequest.getNameSend())
                     .receiveId(i)
                     .sendAt(sendMessageRequest.getTimeSend()).build();
-            sseService.sendNotification(i, notifyDTO);
+            messagingTemplate.convertAndSendToUser(i+"", "/queue/notifications", sendMessageRequest);
         }
     }
 

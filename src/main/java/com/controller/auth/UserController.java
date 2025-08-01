@@ -2,34 +2,24 @@ package com.controller.auth;
 
 
 
-import com.DTO.FriendDTO;
-import com.DTO.PostDTO;
-import com.DTO.ProfileDTO;
-import com.DTO.UserProfileDTO;
+import com.DTO.ProfileSummary;
 import com.constant.AccountType;
-import com.constant.MediaType;
-import com.entity.OTPCode;
 import com.entity.auth.Permission;
 import com.entity.auth.Role;
 import com.entity.auth.User;
 import com.entity.auth.UserProfile;
 import com.exception.UserException;
-import com.request.AuthAccount;
 import com.request.CreatePageRequest;
 import com.request.UpdateAboutRequest;
 import com.response.ApiResponse;
-import com.response.AuthRespone;
 import com.response.AuthoritiesResponse;
-import com.service.CustomUserDetails;
+import com.service.imple.CustomUserDetails;
 import com.service.UpLoadImageFileService;
 import com.service.auth.UserProfileService;
 import com.service.auth.UserService;
-import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,23 +50,26 @@ public class UserController {
         return new ResponseEntity<UserProfile>(user, HttpStatus.OK);
     }
 
+    @GetMapping("/profiles")
+    public ResponseEntity<List<ProfileSummary>> getUserProfilesHandler() throws UserException {
+        int accountId=((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getAccountId();
+        List<ProfileSummary> user=userProfileService.findSummaryByAccountId(accountId);
+
+        return new ResponseEntity<List<ProfileSummary>>(user, HttpStatus.OK);
+    }
+
     @GetMapping("/basicInfo")
     public ResponseEntity<AuthoritiesResponse> getAuthoritiesHandler() throws UserException {
         Integer myId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
         Integer accountId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getAccountId();
-        FriendDTO userProfile=userProfileService.findById(myId);
+
+        ProfileSummary userProfile=userProfileService.findById(myId);
         User user=userService.findById(accountId);
+
         List<String> roles=new ArrayList<>();
         List<String> authorities=new ArrayList<>();
 
-        List<ProfileDTO> profiles=((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getProfiles();
         AccountType accountType=((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getAccountType();
-        for(Role role: user.getRoles()){
-            roles.add(role.getRoleName());
-            for(Permission permission: role.getPermissions()){
-                authorities.add(permission.getPermissionName());
-            }
-        }
 
         for(Role role: user.getRoles()){
             roles.add(role.getRoleName());
@@ -87,12 +80,11 @@ public class UserController {
 
         AuthoritiesResponse authoritiesResponse=new AuthoritiesResponse(
                 user.getEmail(),
-                userProfile.getFriendAvt(),
-                userProfile.getFriendId(),
-                userProfile.getFriendName(),
+                userProfile.getAvt(),
+                userProfile.getId(),
+                userProfile.getName(),
                 authorities,
                 roles,
-                profiles,
                 accountType);
         return new ResponseEntity<AuthoritiesResponse>(authoritiesResponse, HttpStatus.OK);
     }

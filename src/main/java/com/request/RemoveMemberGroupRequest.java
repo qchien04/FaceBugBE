@@ -1,7 +1,7 @@
 package com.request;
 
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.DTO.MemberGroupChatDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -21,7 +21,7 @@ public interface CommunityRepo extends JpaRepository<Community, Integer> {
             g.privacy        AS privacy,
             COUNT(cu.user_profile)   AS totalMembers,
            (
-              SELECT GROUP_CONCAT(avt SEPARATOR ',')
+              SELECT STRING_AGG(limited_avts.avt, ',')
               FROM (
                   SELECT up.avt
                   FROM community_userprofile cu2
@@ -48,7 +48,7 @@ public interface CommunityRepo extends JpaRepository<Community, Integer> {
             g.privacy       AS privacy,
             COUNT(cu2.user_profile) AS totalMembers,
             (
-                SELECT GROUP_CONCAT(up2.avt SEPARATOR ',')
+                SELECT STRING_AGG(up2.avt, ',')
                 FROM community_userprofile cu3
                 JOIN userprofile up2 ON cu3.user_profile = up2.user_id
                 WHERE cu3.community = g.id

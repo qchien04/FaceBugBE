@@ -1,7 +1,6 @@
-package com.controller;
+package com.controller.postactive;
 
-import com.DTO.PostDTO;
-import com.service.CustomUserDetails;
+import com.service.imple.CustomUserDetails;
 import com.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,9 +13,9 @@ public class LikeController {
     private final LikeService likeService;
 
     @PostMapping("/{postId}/like")
-    public void likePost(@PathVariable Integer postId, @RequestBody PostDTO PostDTO) {
+    public void likePost(@PathVariable Integer postId) {
         Integer myId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-        likeService.likePost(myId, PostDTO);
+        likeService.likePost(myId, postId);
     }
 
     @DeleteMapping("/{postId}/unlike")

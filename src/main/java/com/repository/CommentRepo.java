@@ -1,7 +1,7 @@
 package com.repository;
 
 import com.DTO.CommentDTO;
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -1,9 +1,8 @@
 package com.filter;
 
-import com.DTO.ProfileDTO;
 import com.constant.AccountType;
 import com.constant.JwtConstant;
-import com.service.CustomUserDetails;
+import com.service.imple.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -21,7 +20,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 @Component
@@ -41,6 +39,7 @@ public class JwtTokenValidator extends OncePerRequestFilter {
                 &&!path.startsWith("/public")
                 &&!path.startsWith("/favicon.ico")
                 &&!path.startsWith("/sse/")
+                &&!path.startsWith("/ws")
                 &&!path.startsWith("/sockjs")){
 
             System.out.println("Du dieu kien");
@@ -55,23 +54,10 @@ public class JwtTokenValidator extends OncePerRequestFilter {
                     Integer id = claims.get("id", Integer.class);
                     String authorities=String.valueOf(claims.get("authorities"));
                     Integer accountId= claims.get("accountId", Integer.class);
-                    List<?> rawProfiles = claims.get("profiles", List.class);
                     AccountType accountType=AccountType.valueOf(String.valueOf(claims.get("accountType")));
-                    List<ProfileDTO> profiles = new java.util.ArrayList<>();
 
-                    for (Object obj : rawProfiles) {
-                        if (obj instanceof LinkedHashMap<?, ?> map) {
-                            ProfileDTO dto = new ProfileDTO();
-                            dto.setId((Integer) map.get("id"));
-                            dto.setName((String) map.get("name"));
-                            dto.setAvt((String) map.get("avt"));
-                            dto.setAccountType(AccountType.valueOf((String)map.get("accountType")));
-                            profiles.add(dto);
-                        }
-                    }
                     CustomUserDetails userDetails=new CustomUserDetails(accountId,id,username);
 
-                    userDetails.setProfiles(profiles);
                     userDetails.setAccountType(accountType);
 
 

@@ -1,4 +1,4 @@
-package com.controller;
+package com.controller.postactive;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.*;
@@ -16,7 +16,8 @@ public class VideoController {
     public ResponseEntity<Resource> serveVideo(@PathVariable String fileName) {
         try {
 
-            FileSystemResource video = new FileSystemResource(videoDir +""+ fileName);
+            System.out.println("cou"+"----------------------------------------------------------");
+            FileSystemResource video = new FileSystemResource(videoDir +"/"+ fileName);
             System.out.println(videoDir + fileName);
             if (!video.exists()) {
                 return ResponseEntity.notFound().build();

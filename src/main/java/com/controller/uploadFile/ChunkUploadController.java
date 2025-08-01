@@ -1,7 +1,7 @@
-package com.controller;
+package com.controller.uploadFile;
 
-import com.service.CustomUserDetails;
-import com.service.VideoProcessingService;
+import com.service.imple.CustomUserDetails;
+import com.service.imple.VideoProcessingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -9,15 +9,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.io.BufferedOutputStream;
-import java.io.OutputStream;
 
 @RestController
 @RequestMapping("/upload2")

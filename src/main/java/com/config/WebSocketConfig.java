@@ -71,21 +71,61 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
                     if (destination != null) {
                         String s = destination.substring(1);
+                        System.out.println(s +"-------------------------------------------");
+                        String[] arr = s.split("/");
+                        if (arr.length > 1) {
+                            if(arr[0].equals("user")){
+                                CustomPrincipalChat principalChat=(CustomPrincipalChat) accessor.getUser();
+                                if(principalChat!=null && principalChat.getName()!=null){
+                                    return message;
+                                }
+                                else throw new RuntimeException("Connect not valid because user not available!");
+                            }
+                            else{
+                                try {
+                                    Integer conversationId = Integer.parseInt(arr[1]);
+                                    CustomPrincipalChat principalChat=(CustomPrincipalChat) accessor.getUser();
+                                    boolean isInChat=conversationUserService.checkExist(conversationId,userId);
+                                    if(!isInChat){
+                                        throw new RuntimeException("You are not allowed to access channel " + destination);
+                                    }
+                                    assert principalChat != null;
+                                    principalChat.addChannel(conversationId);
+                                    String subscriptionId = accessor.getSubscriptionId();
+                                    accessor.getSessionAttributes().put(subscriptionId, destination);
+
+                                } catch (NumberFormatException e) {
+                                    throw new RuntimeException("Conversation is not valid");
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (StompCommand.UNSUBSCRIBE.equals(accessor.getCommand())) {
+
+                    Integer userId = (Integer) accessor.getSessionAttributes().get("USER_ID");
+
+                    if (userId == null && accessor.getSessionAttributes() != null) {
+                        throw new UserException("Not authenticated");
+                    }
+
+                    String subscriptionId = accessor.getSubscriptionId();
+                    String destination = (String) accessor.getSessionAttributes().get(subscriptionId);
+
+                    if (destination != null) {
+                        String s = destination.substring(1);
                         String[] arr = s.split("/");
                         if (arr.length > 1) {
                             try {
                                 Integer conversationId = Integer.parseInt(arr[1]);
+                                System.out.println("conId "+ conversationId);
                                 CustomPrincipalChat principalChat=(CustomPrincipalChat) accessor.getUser();
-                                principalChat.clearChannel();
-                                principalChat.addChannel(conversationId);
-                                boolean isInChat=conversationUserService.checkExist(conversationId,userId);
-                                if(!isInChat){
-                                    throw new RuntimeException("You are not allowed to access channel " + destination);
-                                }
+                                principalChat.removeChannel(conversationId);
                             } catch (NumberFormatException e) {
-                                throw new RuntimeException("You are not allowed to access channel " + destination);
+                                throw new RuntimeException("Conversation is not valid");
                             }
                         }
+
                     }
                 }
 
@@ -94,18 +134,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         });
     }
 
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/sockjs")
-                .addInterceptors(new CustomHandshakeInterceptor())
-                .setAllowedOrigins("http://localhost:3000", "http://localhost:5174", "http://localhost:5173")
-                .withSockJS();
-    }
+
 
     @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/ws")
+                .addInterceptors(new CustomHandshakeInterceptor())
+                .setAllowedOriginPatterns("*");
+//                .setAllowedOrigins(
+//                        "http://localhost:3000",
+//                        "http://localhost:5174",
+//                        "http://localhost:5173"
+//                );
+    }
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/app"); // Channel for client to send messages to server
-        registry.enableSimpleBroker("/conversation", "/friend", "/typing", "/topic"); // Channels for client to listen to
+        registry.enableSimpleBroker("/conversation", "/queue", "/topic"); // Channels for client to listen to
         registry.setUserDestinationPrefix("/user");
     }
 

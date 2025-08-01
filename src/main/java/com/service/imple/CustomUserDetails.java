@@ -1,14 +1,11 @@
-package com.service;
+package com.service.imple;
 
-import com.DTO.FriendDTO;
-import com.DTO.ProfileDTO;
 import com.constant.AccountType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
-import java.util.List;
 
 @Getter
 @Setter
@@ -17,17 +14,15 @@ public class CustomUserDetails implements UserDetails {
     private Integer id;
     private String username;
     private String password;
-    private List<ProfileDTO> profiles;
     private Collection<? extends GrantedAuthority> authorities;
     private AccountType accountType;
 
-    public CustomUserDetails(Integer accountId,Integer id, String username, String password, Collection<? extends GrantedAuthority> authorities,List<ProfileDTO> profiles,AccountType accountType) {
+    public CustomUserDetails(Integer accountId,Integer id, String username, String password, Collection<? extends GrantedAuthority> authorities,AccountType accountType) {
         this.accountId=accountId;
         this.id = id;
         this.username = username;
         this.password = password;
         this.authorities = authorities;
-        this.profiles= profiles;
         this.accountType=accountType;
     }
     public CustomUserDetails(Integer accountId,Integer id, String username) {

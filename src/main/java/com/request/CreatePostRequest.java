@@ -1,6 +1,6 @@
 package com.request;
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.constant.MediaType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

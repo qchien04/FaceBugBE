@@ -1,7 +1,7 @@
 package com.request;
 
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 public class AddMemberGroupRequest {
     private Integer conversationId;
-    private FriendDTO friend;
+    private ProfileSummary friend;
     private List<Integer> members;
 }

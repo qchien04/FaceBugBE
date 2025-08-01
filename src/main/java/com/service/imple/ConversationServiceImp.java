@@ -2,9 +2,7 @@ package com.service.imple;
 
 
 import com.DTO.ConversationDTO;
-import com.DTO.FriendDTO;
 import com.DTO.MemberGroupChatDTO;
-import com.entity.auth.User;
 import com.entity.auth.UserProfile;
 import com.entity.chatrealtime.Conversation;
 import com.entity.chatrealtime.ConversationUser;
@@ -13,9 +11,7 @@ import com.exception.UserException;
 import com.repository.ConversationRepo;
 import com.repository.ConversationUserRepo;
 import com.request.CreateConversationRequest;
-import com.service.CustomUserDetails;
 import com.service.auth.UserProfileService;
-import com.service.auth.UserService;
 import com.service.chatrealtime.ConversationService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -38,8 +34,8 @@ public class ConversationServiceImp implements ConversationService {
     @Override
     @Transactional
     public ConversationDTO createConversation(CreateConversationRequest createConversationRequest) throws UserException {
-        Integer localUserId=createConversationRequest.getLocalUserId();
         Integer remoteUserId=createConversationRequest.getRemoteUserId();
+        Integer localUserId=((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
 
         UserProfile localUser=UserProfile.builder().id(localUserId).build();
         UserProfile remoteUser=UserProfile.builder().id(remoteUserId).build();
@@ -52,7 +48,6 @@ public class ConversationServiceImp implements ConversationService {
             conversation.setTypeRoom(1);
             conversation.setName(createConversationRequest.getName());
             conversation.setLastMessage(null);
-            conversation.setUserSendLastMessage(localUser);
             conversation=conversationRepo.save(conversation);
 
             ConversationUser conversationUser=new ConversationUser(localUser,conversation, ConversationUser.Role.ADMIN);
@@ -63,8 +58,7 @@ public class ConversationServiceImp implements ConversationService {
             conversationDTO.setType(1);
             conversationDTO.setId(conversation.getId());
             conversationDTO.setName(conversation.getName());
-            conversationDTO.setLastMessage("Đã tạo nhóm");
-            conversationDTO.setUserSendLast("");
+            conversationDTO.setLastMessage(null);
             conversationDTO.setConversationRole(ConversationUser.Role.ADMIN.toString());
             conversationDTO.setUpdatedAt(conversation.getCreatedAt());
 
@@ -89,7 +83,6 @@ public class ConversationServiceImp implements ConversationService {
         conversation.setTypeRoom(0);
         conversation.setName("");
         conversation.setLastMessage(null);
-        conversation.setUserSendLastMessage(null);
 
         conversation=conversationRepo.save(conversation);
 
@@ -105,15 +98,14 @@ public class ConversationServiceImp implements ConversationService {
         conversationDTO.setType(0);
         conversationDTO.setId(conversation.getId());
         conversationDTO.setName(userProfile.getName());
-        conversationDTO.setLastMessage("");
-        conversationDTO.setUserSendLast("");
+        conversationDTO.setLastMessage(null);
         return conversationDTO;
     }
 
     @Override
     @Transactional
-    public void updatePreviewonversation(Integer id, Integer userId, Integer lastMessage) {
-        int t=conversationRepo.updatePreviewConversation(id,userId,lastMessage);
+    public void updatePreviewonversation(Integer id, Integer lastMessage) {
+        int t=conversationRepo.updatePreviewConversation(id,lastMessage);
     }
 
 
@@ -127,6 +119,17 @@ public class ConversationServiceImp implements ConversationService {
     public ConversationDTO findConversationById(Integer conversationId) {
         Integer id=((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
         return conversationRepo.findConversationById(conversationId,id);
+    }
+
+    @Override
+    public Conversation checkHaveConversation(Integer friendId) {
+        Integer myId=((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+        Conversation con = conversationRepo
+                .findIfConversationExist(myId, friendId, PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .orElse(null);
+        return con;
     }
 
     @Override

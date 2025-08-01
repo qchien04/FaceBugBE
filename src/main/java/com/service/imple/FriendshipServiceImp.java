@@ -1,6 +1,6 @@
 package com.service.imple;
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.entity.Friendship;
 import com.entity.auth.UserProfile;
 import com.repository.FriendshipRepo;
@@ -43,18 +43,18 @@ public class FriendshipServiceImp implements FriendshipService{
     }
 
     @Override
-    public List<FriendDTO> getFriends(Integer userId,String key) {
-        List<FriendDTO> friendships = friendshipRepository.findByUserProfileId(userId,key);
+    public List<ProfileSummary> getFriends(Integer userId,String key) {
+        List<ProfileSummary> friendships = friendshipRepository.findByUserProfileId(userId,key);
         return friendships;
     }
 
     @Override
-    public List<FriendDTO> getFriendsByUserId(Integer userId) {
+    public List<ProfileSummary> getFriendsByUserId(Integer userId) {
         return friendshipRepository.findByUserProfileId(userId,"");
     }
 
     @Override
-    public Page<FriendDTO> searchProfile(String key, Boolean isPage, Pageable pageable) {
+    public Page<ProfileSummary> searchProfile(String key, Boolean isPage, Pageable pageable) {
         if(isPage){
             return userProfileRepo.searchPageProfiles(key, pageable);
         }

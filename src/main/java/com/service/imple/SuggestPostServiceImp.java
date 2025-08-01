@@ -1,7 +1,6 @@
 package com.service.imple;
 
 import com.constant.AccountType;
-import com.entity.Friendship;
 import com.entity.Post;
 import com.entity.SuggestPost;
 import com.entity.auth.UserProfile;
@@ -9,12 +8,9 @@ import com.repository.CommunityUserprofileRepo;
 import com.repository.FollowRepo;
 import com.repository.FriendshipRepo;
 import com.repository.SuggestPostRepo;
-import com.service.CustomUserDetails;
-import com.service.FriendshipService;
 import com.service.SuggestPostService;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

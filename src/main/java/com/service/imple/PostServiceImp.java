@@ -5,7 +5,6 @@ import com.constant.*;
 import com.entity.Group.Community;
 import com.entity.Group.CommunityUserprofile;
 import com.entity.Post;
-import com.entity.SuggestPost;
 import com.entity.VideoStorage;
 import com.entity.auth.UserProfile;
 import com.exception.PostException;
@@ -16,8 +15,6 @@ import com.repository.PostRepo;
 import com.repository.VideoStorageRepo;
 import com.request.SharePostRequest;
 import com.service.*;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.ListJoin;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,10 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -115,6 +110,53 @@ public class PostServiceImp implements PostService {
     }
 
     @Override
+    public PostDTO createPost(String title, Integer communityId, MultipartFile media, MediaType mediaType,Boolean anonymous) throws IOException {
+        Integer myId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+
+        UserProfile userProfile= UserProfile.builder().id(myId).build();
+        Community community=Community.builder().id(communityId).build();
+        Post newPost= Post.builder()
+                .author(userProfile)
+                .title(title)
+                .mediaType(mediaType)
+                .type(PostType.GROUP)
+                .community(community)
+                .isAnonymous(anonymous)
+                .build();
+
+        String mediaUrl="";
+        if (media != null && !media.isEmpty() && !mediaType.equals(MediaType.NONE)) {
+            if (media.getContentType().startsWith("image/")&&mediaType.equals(MediaType.IMAGE)) {
+                mediaUrl = upLoadImageFileService.uploadImage(media);
+                newPost.setMedia(mediaUrl);
+            }
+        } else {
+            newPost.setMedia(null);
+        }
+        if (mediaType.equals(MediaType.VIDEO)) {
+            Integer totalVideo=videoStorageRepo.findMaxVideoNumber();
+
+            VideoStorage videoStorage=VideoStorage.builder().videoNumber(totalVideo+1)
+                    .author(UserProfile.builder().id(myId).build())
+                    .build();
+
+            videoStorage=videoStorageRepo.save(videoStorage);
+
+
+            mediaUrl = String.format("playlist_%03d.m3u8", videoStorage.getVideoNumber());
+            newPost.setMedia(mediaUrl);
+
+        }
+
+        Post newpost=postRepo.save(newPost);
+
+        PostDTO postDTO=postMapper.postToPostDTO(newpost);
+
+        suggestPostService.pushSuggestPost(null,myId,newpost,true);
+        return postDTO;
+    }
+
+    @Override
     public void deletePost(Integer postId) {
         Integer myId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
         Post post=postRepo.findPostById(postId);
@@ -153,6 +195,10 @@ public class PostServiceImp implements PostService {
         }
     }
 
+    @Override
+    public Post findById(Integer id) {
+        return postRepo.findById(id).get();
+    }
 
     @Override
     public PostDTO getPostById(Integer id) {
@@ -230,41 +276,6 @@ public class PostServiceImp implements PostService {
         Integer myId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
         Page<Post> posts=postRepo.findAllPostAllCommunity(myId,pageable);
         return postMapper.postPageToPostDTOPage(posts);
-    }
-
-    @Override
-    public PostDTO createPost(String title, Integer communityId, MultipartFile media, MediaType mediaType,Boolean anonymous) throws IOException {
-        Integer myId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-
-        UserProfile userProfile= UserProfile.builder().id(myId).build();
-        Community community=Community.builder().id(communityId).build();
-        Post newPost= Post.builder()
-                .author(userProfile)
-                .title(title)
-                .mediaType(mediaType)
-                .type(PostType.GROUP)
-                .community(community)
-                .isAnonymous(anonymous)
-                .build();
-
-        String mediaUrl="";
-        if (media != null && !media.isEmpty() && !mediaType.equals(MediaType.NONE)){
-            mediaUrl=upLoadImageFileService.uploadImage(media);
-            newPost.setMedia(mediaUrl);
-        }
-        else{
-            newPost.setMedia(null);
-        }
-        Post newPost2=postRepo.save(newPost);
-
-        PostDTO postDTO=PostDTO.builder()
-                .title(title)
-                .media(mediaUrl)
-                .mediaType(mediaType)
-                .build();
-
-        suggestPostService.pushSuggestPost(null,myId,newPost2,true);
-        return postDTO;
     }
 
     @Override

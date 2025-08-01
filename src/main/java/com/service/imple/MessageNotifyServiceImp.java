@@ -3,7 +3,6 @@ package com.service.imple;
 import com.DTO.MessageNotifyDTO;
 import com.entity.chatrealtime.MessageNotify;
 import com.repository.MessageNotifyRepo;
-import com.service.CustomUserDetails;
 import com.service.chatrealtime.MessageNotifyService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;

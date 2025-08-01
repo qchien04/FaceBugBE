@@ -1,6 +1,6 @@
 package com.repository;
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.entity.Friendship;
 import com.entity.auth.UserProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,11 +14,11 @@ import java.util.Set;
 
 public interface FriendshipRepo extends JpaRepository<Friendship, Long> {
 
-    @Query("SELECT new com.DTO.FriendDTO(u.friendProfile.id, u.friendProfile.name, u.friendProfile.avt) " +
+    @Query("SELECT new com.DTO.ProfileSummary(u.friendProfile.id, u.friendProfile.name, u.friendProfile.avt) " +
             "FROM Friendship u " +
             "WHERE u.userProfile.id = :id " +
-            "AND u.friendProfile.name LIKE %:key%")
-    List<FriendDTO> findByUserProfileId(@Param("id") Integer id, @Param("key") String key);
+            "AND LOWER(u.friendProfile.name) LIKE LOWER(CONCAT('%', :key, '%'))")
+    List<ProfileSummary> findByUserProfileId(@Param("id") Integer id, @Param("key") String key);
 
     @Query("SELECT u.friendProfile.id " +
             "FROM Friendship u " +

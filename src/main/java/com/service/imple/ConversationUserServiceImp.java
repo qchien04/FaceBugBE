@@ -1,6 +1,6 @@
 package com.service.imple;
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.DTO.MemberGroupChatDTO;
 import com.entity.auth.UserProfile;
 import com.entity.chatrealtime.Conversation;
@@ -8,7 +8,6 @@ import com.entity.chatrealtime.ConversationUser;
 import com.repository.ConversationRepo;
 import com.repository.ConversationUserRepo;
 import com.repository.UserProfileRepo;
-import com.service.CustomUserDetails;
 import com.service.chatrealtime.ConversationUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,10 +36,12 @@ public class ConversationUserServiceImp implements ConversationUserService {
 
         conversationUserRepo.save(cu);
 
-        FriendDTO friendDTO=userProfileRepo.searchUserProfileDTO(friendId);
-        MemberGroupChatDTO mgDTO=new MemberGroupChatDTO(friendDTO.getFriendId(),
-                friendDTO.getFriendName(),
-                friendDTO.getFriendAvt(),
+        ProfileSummary friendDTO=userProfileRepo.searchUserProfileDTO(friendId);
+        MemberGroupChatDTO mgDTO=new MemberGroupChatDTO(
+                conversationId,
+                friendDTO.getId(),
+                friendDTO.getName(),
+                friendDTO.getAvt(),
                 ConversationUser.Role.MEMBER);
 
         return mgDTO;

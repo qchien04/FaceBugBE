@@ -17,6 +17,7 @@ public interface PostService {
     PostDTO createPost(String title, MultipartFile media, MediaType mediaType) throws IOException;
     void deletePost(Integer postId);
     void updatePost(Integer postId,String tilte);
+    Post findById(Integer id);
     PostDTO getPostById(Integer id);
     Page<PostDTO> getUserPost(Integer userId, Pageable pageable);
     List<PostDTO> getPostWithMediaType(Integer userId,MediaType mediaType);

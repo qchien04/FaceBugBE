@@ -1,15 +1,13 @@
 package com.controller.auth;
 
-import com.DTO.FriendDTO;
-import com.DTO.ProfileDTO;
 import com.constant.AccountType;
 import com.entity.auth.User;
 import com.entity.auth.UserProfile;
 import com.response.ApiResponse;
 import com.response.AuthRespone;
 import com.security.TokenProvider;
-import com.service.CustomUserDetails;
-import com.service.CustomUserDetailsService;
+import com.service.imple.CustomUserDetails;
+import com.service.imple.CustomUserDetailsService;
 import com.service.auth.UserProfileService;
 import com.service.auth.UserService;
 import lombok.AllArgsConstructor;
@@ -21,15 +19,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -71,13 +66,11 @@ public class GoogleAuthController{
                     userProfile=userProfileService.save(userProfile);
 
                     List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
-                    CustomUserDetails userDetails = new CustomUserDetails(user.getId(),userProfile.getId(),email,"123456789" ,
+                    CustomUserDetails userDetails = new CustomUserDetails(user.getId(),
+                            userProfile.getId(),
+                            email,
+                            "123456789" ,
                             authorities,
-                            Collections.singletonList(ProfileDTO.builder().id(userProfile.getId())
-                                    .name(userProfile.getName())
-                                    .avt(userProfile.getAvt())
-                                    .accountType(userProfile.getAccountType())
-                                    .build()),
                             userProfile.getAccountType());
                     Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(authentication);

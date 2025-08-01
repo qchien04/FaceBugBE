@@ -2,7 +2,7 @@ package com.repository;
 
 
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.entity.FriendRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,11 +16,11 @@ import java.util.Optional;
 public interface FriendRequestRepo extends JpaRepository<FriendRequest, Integer> {
     Optional<FriendRequest> findBySenderIdAndReceiverId(Integer senderId, Integer receiverId);
 
-    @Query("SELECT new com.DTO.FriendDTO(f.sender.id, f.sender.name, f.sender.avt) " +
+    @Query("SELECT new com.DTO.ProfileSummary(f.sender.id, f.sender.name, f.sender.avt) " +
             "FROM FriendRequest f " +
             "JOIN f.sender " +
             "WHERE f.receiver.id = :userId ")
-    List<FriendDTO> findFriendRequests(
+    List<ProfileSummary> findFriendRequests(
             @Param("userId") Integer userId
     );
 

@@ -1,4 +1,4 @@
-package com.controller;
+package com.controller.uploadFile;
 
 
 import com.service.UpLoadImageFileService;

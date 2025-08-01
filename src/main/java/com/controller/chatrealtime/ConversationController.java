@@ -1,12 +1,11 @@
 package com.controller.chatrealtime;
 
 import com.DTO.ConversationDTO;
-import com.DTO.FriendDTO;
 import com.DTO.MemberGroupChatDTO;
+import com.constant.MessageType;
 import com.entity.auth.UserProfile;
 import com.entity.chatrealtime.Conversation;
 import com.entity.chatrealtime.Message;
-import com.exception.ConversationException;
 import com.exception.UserException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.request.AddMemberGroupRequest;
@@ -14,8 +13,7 @@ import com.request.ChangeAvtGroupRequest;
 import com.request.CreateConversationRequest;
 import com.request.RemoveMemberGroupRequest;
 import com.response.ApiResponse;
-import com.service.CustomUserDetails;
-import com.service.SseService;
+import com.service.imple.CustomUserDetails;
 import com.service.UpLoadImageFileService;
 import com.service.chatrealtime.ConversationService;
 import com.service.chatrealtime.ConversationUserService;
@@ -52,9 +50,6 @@ public class ConversationController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @Autowired
-    private SseService sseService;
-
     @PostMapping("/create")
     public ResponseEntity<ConversationDTO> createConversationHandler(@RequestBody CreateConversationRequest createConversationRequest) throws UserException {
 
@@ -68,23 +63,21 @@ public class ConversationController {
     public ResponseEntity<MemberGroupChatDTO> addGroupConversationHandler(@RequestBody AddMemberGroupRequest request) throws UserException {
 
         MemberGroupChatDTO memberGroupChatDTO=conversationUserService.addMemberToGroup(request.getConversationId(),
-                request.getFriend().getFriendId());
+                request.getFriend().getId());
 
-        for(int i:request.getMembers()){
-            sseService.sendAddMember(i,request.getConversationId(),memberGroupChatDTO);
-        }
 
         Integer id=((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
 
         Message message=new Message();
         message.setConversation(Conversation.builder().id(request.getConversationId()).build());
-        message.setMessageType(Message.MessageType.NOTICE);
-        message.setContent("Đã thêm "+request.getFriend().getFriendName()+" vào nhóm!");
+        message.setMessageType(MessageType.NOTICE);
+        message.setContent("Đã thêm "+request.getFriend().getName()+" vào nhóm!");
         message.setSender(UserProfile.builder().id(id).build());
         message.setTimeSend(LocalDateTime.now());
 
         messagingTemplate.convertAndSend("/conversation/" + request.getConversationId(),
                 message);
+        messagingTemplate.convertAndSendToUser(request.getFriend().getId()+"", "/queue/notifications", message);
 
         messageService.createMessage(message);
 
@@ -118,19 +111,30 @@ public class ConversationController {
         return new ResponseEntity<ConversationDTO>(c, HttpStatus.OK);
     }
 
+    @GetMapping("/checkHaveConversation")
+    public ResponseEntity<ConversationDTO> checkHaveConversation(@RequestParam(value = "userId", required = false) Integer userId)
+            throws UserException {
+
+        Conversation c = conversationService.checkHaveConversation(userId);
+        if(c==null){
+            ConversationDTO cd=new ConversationDTO();
+            return new ResponseEntity<ConversationDTO>(cd, HttpStatus.OK);
+        }
+        ConversationDTO cd=new ConversationDTO();
+        cd.setId(c.getId());
+        return new ResponseEntity<ConversationDTO>(cd, HttpStatus.OK);
+    }
+
     @DeleteMapping("/removeMember")
     public ResponseEntity<ApiResponse> removeMemberHandler(@RequestBody RemoveMemberGroupRequest request){
 
-
         conversationUserService.removeMember(request.getConversationId(),request.getMember().getMemberId());
-        for(int i:request.getMembers()){
-            sseService.sendKickMember(i,request.getConversationId(),request.getMember().getMemberId());
-        }
+
         Integer id=((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
 
         Message message=new Message();
         message.setConversation(Conversation.builder().id(request.getConversationId()).build());
-        message.setMessageType(Message.MessageType.NOTICE);
+        message.setMessageType(MessageType.NOTICE);
         message.setContent("Đã đá "+request.getMember().getMemberName()+" ra khỏi nhóm!");
         message.setSender(UserProfile.builder().id(id).build());
         message.setTimeSend(LocalDateTime.now());
@@ -156,13 +160,10 @@ public class ConversationController {
 
         String imageUrl = uploadImageFile.uploadImage(file);
         System.out.println(imageUrl);
-        for (int memberId : request.getMembers()) {
-            sseService.sendChangeAvt(memberId, request.getConversationId(), imageUrl);
-        }
 
         Message message = new Message();
         message.setConversation(Conversation.builder().id(request.getConversationId()).build());
-        message.setMessageType(Message.MessageType.NOTICE);
+        message.setMessageType(MessageType.NOTICE);
         message.setContent("Ảnh nhóm đã được thay đổi");
         message.setSender(UserProfile.builder().id(userId).build());
         message.setTimeSend(LocalDateTime.now());
@@ -187,6 +188,8 @@ public class ConversationController {
         apiResponse.setStatus(true);
         return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
     }
+
+
 
 
 

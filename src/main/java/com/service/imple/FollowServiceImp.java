@@ -4,7 +4,6 @@ import com.constant.FollowState;
 import com.entity.Follow;
 import com.entity.auth.UserProfile;
 import com.repository.FollowRepo;
-import com.service.CustomUserDetails;
 import com.service.FollowService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;

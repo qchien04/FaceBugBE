@@ -1,6 +1,6 @@
 package com.repository;
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.entity.Follow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,10 +11,10 @@ import java.util.List;
 
 public interface FollowRepo extends JpaRepository<Follow, Integer> {
 
-    @Query("SELECT new com.DTO.FriendDTO(u.pageProfile.id, u.pageProfile.name, u.pageProfile.avt)" +
+    @Query("SELECT new com.DTO.ProfileSummary(u.pageProfile.id, u.pageProfile.name, u.pageProfile.avt)" +
             "FROM Follow u " +
             "WHERE u.followerProfile.id = :id")
-    List<FriendDTO> findALlPageUserFollow(@Param("id") Integer id);
+    List<ProfileSummary> findALlPageUserFollow(@Param("id") Integer id);
 
     @Query("SELECT f.followerProfile.id " +
             "FROM Follow f " +

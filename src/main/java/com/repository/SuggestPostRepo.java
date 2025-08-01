@@ -18,7 +18,7 @@ public interface SuggestPostRepo extends JpaRepository<SuggestPost,Integer> {
     FROM suggest_post
     WHERE render_time_remaining > 0
     AND profile_seen = :profileSeenId
-    ORDER BY RAND()
+    ORDER BY RANDOM()
     LIMIT 5
     """, nativeQuery = true)
     List<SuggestPost> findByProfileSeenId(@Param("profileSeenId") Integer profileSeenId);

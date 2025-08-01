@@ -34,10 +34,6 @@ public class Conversation {
     @JoinColumn(name = "last_message", nullable = true)
     private Message lastMessage;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_send_last_message", nullable = true)
-    private UserProfile userSendLastMessage;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

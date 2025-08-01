@@ -1,7 +1,6 @@
 package com.controller.auth;
 
 
-import com.DTO.ProfileDTO;
 import com.constant.AccountType;
 import com.entity.OTPCode;
 import com.entity.auth.User;
@@ -15,23 +14,23 @@ import com.response.ApiResponse;
 import com.response.AuthRespone;
 import com.response.RegisterRespone;
 import com.security.TokenProvider;
-import com.service.CustomUserDetails;
+import com.service.imple.CustomUserDetails;
 import com.service.MailService;
 import com.service.OTPCodeService;
-import com.service.CustomUserDetailsService;
+import com.service.imple.CustomUserDetailsService;
 import com.service.auth.UserProfileService;
 import com.service.auth.UserService;
 import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Random;
 
 @RestController
@@ -157,19 +156,15 @@ public class AuthController {
 
     @PostMapping("/switchProfile/{id}")
     public ResponseEntity<AuthRespone> changePasswordHandler(@PathVariable("id") Integer id) throws UserException {
-        System.out.println("Swap profile");
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof CustomUserDetails) {
-            System.out.println("CustomUserDetails");
-        } else if (principal instanceof String) {
-            System.out.println(principal);
-        }
         CustomUserDetails userDetails = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<UserProfile> profiles=userProfileService.findByAccountId(userDetails.getAccountId());
 
         boolean check=false;
         AccountType accountType=AccountType.PAGE;
-        for(ProfileDTO i: userDetails.getProfiles()){
+        for(UserProfile i: profiles){
             if(id.equals(i.getId())){
                 check=true;
                 accountType=i.getAccountType();

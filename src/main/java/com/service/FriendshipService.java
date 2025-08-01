@@ -1,6 +1,6 @@
 package com.service;
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.entity.auth.User;
 import com.entity.auth.UserProfile;
 import org.springframework.data.domain.Page;
@@ -14,7 +14,7 @@ public interface FriendshipService {
 
     public void addFriend(Integer userId, Integer remoteUserId);
     public void unFriend(Integer userId, Integer remoteUserId);
-    public List<FriendDTO> getFriends(Integer userId,String key);
-    public List<FriendDTO> getFriendsByUserId(Integer userId);
-    public Page<FriendDTO> searchProfile(String key, Boolean isPage, Pageable pageable);
+    public List<ProfileSummary> getFriends(Integer userId,String key);
+    public List<ProfileSummary> getFriendsByUserId(Integer userId);
+    public Page<ProfileSummary> searchProfile(String key, Boolean isPage, Pageable pageable);
 }

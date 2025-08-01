@@ -1,4 +1,4 @@
-package com.controller;
+package com.controller.postactive;
 
 import com.DTO.CommentDTO;
 import com.service.CommentService;

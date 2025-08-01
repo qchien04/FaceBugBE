@@ -1,13 +1,11 @@
-package com.controller;
+package com.controller.relationship;
 
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.constant.FriendRequestStatus;
-import com.request.MakeFriendRequest;
 import com.response.ApiResponse;
-import com.service.CustomUserDetails;
+import com.service.imple.CustomUserDetails;
 import com.service.FriendRequestService;
-import com.service.FriendshipService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,8 +56,8 @@ public class FriendRequestController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<FriendDTO>> allRequest() {
-        List<FriendDTO> request=friendRequestService.getAllRequest();
+    public ResponseEntity<List<ProfileSummary>> allRequest() {
+        List<ProfileSummary> request=friendRequestService.getAllRequest();
         return new ResponseEntity<>(request, HttpStatus.OK);
     }
 

@@ -29,6 +29,12 @@ public class ConversationUser {
     @JoinColumn(name = "conversation_id", nullable = false)
     private Conversation conversation;
 
+    @Column(name = "active",nullable = true) // can user see conversation ?
+    private Boolean isActive;
+
+    @Column(name = "last_read_at",nullable = true)
+    private LocalDateTime  lastReadAt= LocalDateTime.now();
+
     @Column(name = "joined_at",nullable = false)
     private LocalDateTime joinedAt = LocalDateTime.now();
 

@@ -1,17 +1,15 @@
-package com.controller;
+package com.controller.community;
 
 
 import com.DTO.CommunityDTO;
 import com.DTO.CommunityUserprofileDTO;
-import com.DTO.FriendDTO;
-import com.DTO.PostDTO;
+import com.DTO.ProfileSummary;
 import com.constant.CommunityRole;
 import com.entity.Group.Community;
 import com.entity.Group.CommunityUserprofile;
-import com.entity.auth.UserProfile;
 import com.exception.CommunityException;
 import com.response.ApiResponse;
-import com.service.CustomUserDetails;
+import com.service.imple.CustomUserDetails;
 import com.service.UpLoadImageFileService;
 import com.service.group.CommunityService;
 import lombok.RequiredArgsConstructor;
@@ -105,8 +103,8 @@ public class CommunityController {
     }
 
     @PostMapping("/{communityId}/inviteCommunity")
-    public ResponseEntity<ApiResponse> inviteCommunityHandler(@PathVariable("communityId") Integer communityId, @RequestBody FriendDTO friendDTO) {
-        communityService.inviteCommunity(friendDTO.getFriendId(), communityId);
+    public ResponseEntity<ApiResponse> inviteCommunityHandler(@PathVariable("communityId") Integer communityId, @RequestBody ProfileSummary friendDTO) {
+        communityService.inviteCommunity(friendDTO.getId(), communityId);
         ApiResponse res = new ApiResponse("Successfully...", true);
         return new ResponseEntity<>(res, HttpStatus.OK);
     }

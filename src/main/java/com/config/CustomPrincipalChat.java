@@ -32,6 +32,10 @@ public class CustomPrincipalChat implements Principal {
         subscribedChannels.remove(channel);
     }
 
+    public boolean inChannel(Integer channel) {
+       return subscribedChannels.contains(channel);
+    }
+
     public void clearChannel() {
         subscribedChannels.clear();
     }

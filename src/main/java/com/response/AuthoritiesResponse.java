@@ -1,6 +1,5 @@
 package com.response;
 
-import com.DTO.ProfileDTO;
 import com.constant.AccountType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +20,6 @@ public class AuthoritiesResponse {
     private String name;
     private List<String> authorities;
     private List<String> roles;
-    private List<ProfileDTO> profiles;
     private AccountType accountType;
 
     @Override

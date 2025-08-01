@@ -12,6 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MemberGroupChatDTO {
+    private Integer conversationId;
     private Integer memberId;
     private String memberName;
     private String memberAvt;

@@ -1,7 +1,7 @@
 package com.service.imple;
 
 import com.DTO.CommentDTO;
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.constant.NotificationType;
 import com.entity.Comment;
 import com.entity.Post;
@@ -12,10 +12,9 @@ import com.repository.CommentRepo;
 import com.repository.PostRepo;
 import com.repository.UserProfileRepo;
 import com.service.CommentService;
-import com.service.CustomUserDetails;
-import com.service.SseService;
 import com.service.noitify.NotificationService;
 import lombok.AllArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +29,7 @@ public class CommentServiceImp implements CommentService {
     private final PostRepo postRepo;
     private final UserProfileRepo userProfileRepo;
     private final NotificationService notificationService;
-    private final SseService sseService;
+    private SimpMessagingTemplate messagingTemplate;
 
     @Override
     public List<CommentDTO> getCommentsByPost(Integer postId) {
@@ -80,21 +79,21 @@ public class CommentServiceImp implements CommentService {
         //thong bao
         Post srcPost = postRepo.findById(comment.getPostId()).get();
         if(!myId.equals(srcPost.getAuthor().getId())) {
-            FriendDTO friendDTO = userProfileRepo.searchUserProfileDTO(comment.getAuthorId());
+            ProfileSummary friendDTO = userProfileRepo.searchUserProfileDTO(comment.getAuthorId());
             Notification commentNotification = Notification.builder()
                     .link("/post/" + comment.getPostId() + "?commentId=" + commentAfterSave.getId())
                     .isClicked(false)
                     .isRead(false)
                     .createdAt(LocalDateTime.now())
                     .type(NotificationType.COMMENT)
-                    .message(friendDTO.getFriendName() + " đã bình luận về bài viết của bạn!")
-                    .avt(friendDTO.getFriendAvt())
+                    .message(friendDTO.getName() + " đã bình luận về bài viết của bạn!")
+                    .avt(friendDTO.getAvt())
                     .receive(UserProfile.builder().id(srcPost.getAuthor().getId()).build())
                     .sender(UserProfile.builder().id(comment.getAuthorId()).build())
                     .build();
             notificationService.createNotification(commentNotification);
 
-            sseService.pushNotify(srcPost.getAuthor().getId(), commentNotification);
+            messagingTemplate.convertAndSendToUser(srcPost.getAuthor().getId().toString(), "/queue/notifications", commentNotification);
         }
         return comment;
     }

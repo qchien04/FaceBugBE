@@ -1,6 +1,6 @@
 package com.service.chatrealtime;
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.DTO.MemberGroupChatDTO;
 import com.entity.chatrealtime.ConversationUser;
 

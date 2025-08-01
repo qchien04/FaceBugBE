@@ -2,7 +2,7 @@ package com.config;
 
 
 import com.filter.JwtTokenValidator;
-import com.service.CustomUserDetailsService;
+import com.service.imple.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +49,9 @@ public class SecurityConfiguration {
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration corsConfig = new CorsConfiguration();
                         // Chỉ định nguồn gốc cụ thể
-                        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:3000","http://localhost:3001","http://localhost:5174",
-                                                                    "http://localhost:5173","http://127.0.0.1:5500"));
+//                        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:3000","http://localhost:3001","http://localhost:5174",
+//                                                                    "http://localhost:5173","http://127.0.0.1:5500","http://192.168.1.40:5173"));
+                        corsConfig.addAllowedOriginPattern("*");
                         // Chỉ định các phương thức HTTP cụ thể
                         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
 

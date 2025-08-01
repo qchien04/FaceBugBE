@@ -1,11 +1,10 @@
-package com.service;
+package com.service.imple;
 
 import java.io.IOException;
 
 import com.entity.VideoStorage;
 import com.exception.UploadVideoException;
 import com.repository.VideoStorageRepo;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,8 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Service

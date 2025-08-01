@@ -1,18 +1,14 @@
-package com.controller;
+package com.controller.noitification;
 
 
 
-import com.DTO.FriendDTO;
-import com.constant.NotificationType;
 import com.entity.notify.Notification;
 import com.request.NotificationRequest;
 import com.response.ApiResponse;
-import com.service.CustomUserDetails;
 import com.service.noitify.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationController {
     private final NotificationService notificationService;
+
 
     @PostMapping("/markAll")
     public ResponseEntity<ApiResponse> markAllNotification() {
@@ -38,9 +35,9 @@ public class NotificationController {
 
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<Notification>> getNotifications(@PathVariable Integer userId) {
-        List<Notification> notification= notificationService.getNotificationsByUserId(userId);
+    @GetMapping("/")
+    public ResponseEntity<List<Notification>> getNotifications() {
+        List<Notification> notification= notificationService.getNotifications();
         return new ResponseEntity<>(notification, HttpStatus.OK);
     }
 }

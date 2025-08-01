@@ -6,9 +6,9 @@ import com.entity.notify.Notification;
 import com.entity.notify.NotificationAction;
 import com.repository.NotificationRepo;
 import com.request.NotificationRequest;
-import com.service.CustomUserDetails;
 import com.service.noitify.NotificationService;
 import lombok.AllArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +21,8 @@ import java.util.List;
 public class NotificationServiceImp implements NotificationService {
 
     private final NotificationRepo notificationRepository;
+
+    private SimpMessagingTemplate messagingTemplate;
 
     @Override
     public Notification createNotification(Integer userId, NotificationType type, String message, String link, List<NotificationAction> actions) {
@@ -64,8 +66,9 @@ public class NotificationServiceImp implements NotificationService {
     }
 
     @Override
-    public List<Notification> getNotificationsByUserId(Integer userId) {
-        return notificationRepository.findByReceiveIdOrderByCreatedAtDesc(userId);
+    public List<Notification> getNotifications() {
+        Integer myId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+        return notificationRepository.findByReceiveIdOrderByCreatedAtDesc(myId);
     }
 
     @Override
@@ -82,6 +85,11 @@ public class NotificationServiceImp implements NotificationService {
     public void markAllNotificationAsRead() {
         Integer myId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
         notificationRepository.markAllNotificationAsRead(myId);
+    }
+
+    @Override
+    public void sendNotification(Notification notification,String principal) {
+        messagingTemplate.convertAndSendToUser(principal, "/queue/notify", "hello");
     }
 
 }

@@ -14,9 +14,11 @@ public interface NotificationService {
                                            List<NotificationAction> actions);
     public Notification createNotification(NotificationRequest notificationRequest);
     public Notification createNotification(Notification notification);
-    public List<Notification> getNotificationsByUserId(Integer userId);
+    public List<Notification> getNotifications();
     public List<Notification> findBySenderIdAndUserIdAndType(Integer senderId, Integer userId,NotificationType type);
     void saveAll(List<Notification> notifications);
 
     public void markAllNotificationAsRead();
+
+    public void sendNotification(Notification notification,String principal);
 }

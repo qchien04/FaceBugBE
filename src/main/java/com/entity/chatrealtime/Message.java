@@ -1,5 +1,6 @@
 package com.entity.chatrealtime;
 
+import com.constant.MessageType;
 import com.entity.auth.UserProfile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -54,8 +55,5 @@ public class Message {
         return sender != null ? sender.getId() : null;
     }
 
-    public enum MessageType {
-        TEXT, IMAGE, NOTICE
-    }
 
 }

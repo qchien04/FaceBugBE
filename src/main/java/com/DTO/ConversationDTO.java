@@ -1,14 +1,13 @@
 package com.DTO;
 
 
-import com.entity.chatrealtime.ConversationUser;
+import com.constant.MessageType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -19,34 +18,27 @@ public class ConversationDTO {
     private String avt;
     private Integer type;
     private String conversationRole;
-    private String lastMessage;
-    private String userSendLast;
+    private MessageDTO lastMessage;
     private LocalDateTime updatedAt;
 
-    public ConversationDTO(Integer id, String name, String avt, Integer type,String conversationRole, String lastMessage,
-                           String userSendLast, Timestamp updatedAt) {
+    public ConversationDTO(Integer id,
+                           String name,
+                           String avt,
+                           Integer type,
+                           String conversationRole,
+                           Integer messageId,
+                           String messageContent,
+                           String messageType,
+                           Timestamp timeSend,
+                           Integer senderId,
+                           String senderName,
+                           Timestamp updatedAt) {
         this.id = id;
         this.name = name;
         this.avt = avt;
         this.type = type;
         this.conversationRole=conversationRole;
-        this.lastMessage = lastMessage;
-        this.userSendLast=userSendLast;
-        this.updatedAt = updatedAt != null ? updatedAt.toLocalDateTime() : null;
-
-
-    }
-
-    @Override
-    public String toString() {
-        return "ConversationDTO{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", avt='" + avt + '\'' +
-                ", type=" + type +
-                ", lastMessage='" + lastMessage + '\'' +
-                ", userSendLast='" + userSendLast + '\'' +
-                ", updatedAt=" + updatedAt +
-                '}';
+        this.lastMessage = new MessageDTO(messageId,messageContent,messageType,timeSend,senderId,senderName);
+        this.updatedAt = updatedAt.toLocalDateTime();
     }
 }

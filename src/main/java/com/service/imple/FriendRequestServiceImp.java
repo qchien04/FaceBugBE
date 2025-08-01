@@ -1,6 +1,6 @@
 package com.service.imple;
 
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.constant.FriendRequestStatus;
 import com.constant.NotificationType;
 import com.entity.FriendRequest;
@@ -12,11 +12,10 @@ import com.exception.FriendException;
 import com.repository.FriendRequestRepo;
 import com.repository.FriendshipRepo;
 import com.repository.UserProfileRepo;
-import com.service.CustomUserDetails;
 import com.service.FriendRequestService;
-import com.service.SseService;
 import com.service.noitify.NotificationService;
 import lombok.AllArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,17 +28,17 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class FriendRequestServiceImp implements FriendRequestService {
+    private SimpMessagingTemplate messagingTemplate;
 
     private FriendRequestRepo friendRequestRepo;
     private FriendshipRepo friendshipRepo;
     private UserProfileRepo userProfileRepo;
     private NotificationService notificationService;
-    private SseService sseService;
 
     @Override
-    public List<FriendDTO> getAllRequest() {
+    public List<ProfileSummary> getAllRequest() {
         Integer myId = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-        List<FriendDTO> request=friendRequestRepo.findFriendRequests(myId);
+        List<ProfileSummary> request=friendRequestRepo.findFriendRequests(myId);
         return request;
     }
 
@@ -62,7 +61,7 @@ public class FriendRequestServiceImp implements FriendRequestService {
                 "POST");
         actions.add(action);
         actions.add(action2);
-        FriendDTO friendDTO=userProfileRepo.searchUserProfileDTO(senderId);
+        ProfileSummary friendDTO=userProfileRepo.searchUserProfileDTO(senderId);
         FriendRequest newRequest = FriendRequest.builder()
                 .sender(UserProfile.builder().id(senderId).build())
                 .receiver(UserProfile.builder().id(receiverId).build())
@@ -74,8 +73,8 @@ public class FriendRequestServiceImp implements FriendRequestService {
                 .isRead(false)
                 .createdAt(LocalDateTime.now())
                 .type(NotificationType.FRIEND_REQUEST)
-                .message(friendDTO.getFriendName()+" đã gửi 1 lời mời kết bạn!")
-                .avt(friendDTO.getFriendAvt())
+                .message(friendDTO.getName()+" đã gửi 1 lời mời kết bạn!")
+                .avt(friendDTO.getAvt())
                 .actions(actions)
                 .receive(UserProfile.builder().id(receiverId).build())
                 .sender(UserProfile.builder().id(myId).build())
@@ -83,7 +82,10 @@ public class FriendRequestServiceImp implements FriendRequestService {
 
         notificationService.createNotification(addFriendNotification);
 
-        sseService.pushNotify(receiverId,addFriendNotification);
+        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        messagingTemplate.convertAndSendToUser(receiverId.toString(), "/queue/notifications", addFriendNotification);
+        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
         friendRequestRepo.save(newRequest);
     }
 

@@ -3,7 +3,7 @@ package com.service.imple;
 
 import com.DTO.CommunityDTO;
 import com.DTO.CommunityUserprofileDTO;
-import com.DTO.FriendDTO;
+import com.DTO.ProfileSummary;
 import com.constant.CommunityRole;
 import com.constant.NotificationType;
 import com.constant.Privacy;
@@ -17,16 +17,14 @@ import com.mapper.CommunityUserprofileMapper;
 import com.repository.CommunityRepo;
 import com.repository.CommunityUserprofileRepo;
 import com.repository.UserProfileRepo;
-import com.service.CustomUserDetails;
-import com.service.SseService;
 import com.service.group.CommunityService;
 import com.service.noitify.NotificationService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -41,7 +39,7 @@ public class CommunityServiceImp implements CommunityService {
     private final UserProfileRepo userProfileRepo;
     private final NotificationService notificationService;
     private final CommunityUserprofileMapper communityUserprofileMapper;
-    private final SseService sseService;
+    private final SimpMessagingTemplate messagingTemplate;
 
 
     @Override
@@ -188,7 +186,7 @@ public class CommunityServiceImp implements CommunityService {
                     .build();
 
             Notification notification = notificationService.createNotification(joinSuccessNoti);
-            sseService.pushNotify(userProfileId,notification);
+            messagingTemplate.convertAndSendToUser(userProfileId.toString(), "/queue/notifications", notification);
         }
         else throw new CommunityException("Không có quyền");
     }
@@ -220,7 +218,7 @@ public class CommunityServiceImp implements CommunityService {
                     .build();
 
             Notification notification = notificationService.createNotification(joinSuccessNoti);
-            sseService.pushNotify(userProfileId,notification);
+            messagingTemplate.convertAndSendToUser(userProfileId.toString(), "/queue/notifications", notification);
             communityUserprofileRepo.save(pendingMember);
         }
         else throw new CommunityException("Không có quyền");
@@ -245,7 +243,7 @@ public class CommunityServiceImp implements CommunityService {
         }
         else{
             Community community=communityRepo.findById(communityId).get();
-            FriendDTO friendDTO=userProfileRepo.searchUserProfileDTO(myId);
+            ProfileSummary friendDTO=userProfileRepo.searchUserProfileDTO(myId);
 
             List<NotificationAction> actions=new ArrayList<>();
             NotificationAction action=new NotificationAction("Chấp nhận",
@@ -263,8 +261,8 @@ public class CommunityServiceImp implements CommunityService {
                     .isRead(false)
                     .createdAt(LocalDateTime.now())
                     .type(NotificationType.INVITE_COMMUNITY)
-                    .message(friendDTO.getFriendName()+" đã mời bạn vào nhóm "+community.getName())
-                    .avt(friendDTO.getFriendAvt())
+                    .message(friendDTO.getName()+" đã mời bạn vào nhóm "+community.getName())
+                    .avt(friendDTO.getAvt())
                     .actions(actions)
                     .receive(UserProfile.builder().id(userProfileId).build())
                     .sender(UserProfile.builder().id(myId).build())

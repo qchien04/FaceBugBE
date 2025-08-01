@@ -1,4 +1,4 @@
-package com.controller;
+package com.controller.postactive;
 
 
 
@@ -7,10 +7,9 @@ import com.DTO.PostDTO;
 import com.constant.CategoryContent;
 import com.constant.MediaType;
 
-import com.entity.Post;
 import com.request.SharePostRequest;
 import com.response.ApiResponse;
-import com.service.CustomUserDetails;
+import com.service.imple.CustomUserDetails;
 import com.service.PostService;
 import com.service.SuggestPostService;
 import lombok.RequiredArgsConstructor;
