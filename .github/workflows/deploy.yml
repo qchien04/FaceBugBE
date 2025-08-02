@@ -22,6 +22,12 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v3
 
+      - name: Check env values
+        run: |
+          echo "SPRING_DATASOURCE_URL: $SPRING_DATASOURCE_URL"
+          echo "SPRING_DATASOURCE_USERNAME: $SPRING_DATASOURCE_USERNAME"
+          echo "JWT_SECRET: $JWT_SECRET"
+
       - name: Build Spring Boot project
         run: mvn install -DskipTests=true
 
