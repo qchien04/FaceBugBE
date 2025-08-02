@@ -29,4 +29,4 @@ jobs:
           pkill -f 'demo-0.0.1-SNAPSHOT.jar' || true
           rm -rf /projects/SocialNetwork/SocialNetworkBE/*
           cp -r target/* /projects/SocialNetwork/SocialNetworkBE/
-          java -jar /projects/SocialNetwork/SocialNetworkBE/demo-0.0.1-SNAPSHOT.jar
+          nohup java -jar /projects/SocialNetwork/SocialNetworkBE/demo-0.0.1-SNAPSHOT.jar > nohup.out 2>&1 &
