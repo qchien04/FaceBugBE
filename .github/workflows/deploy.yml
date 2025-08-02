@@ -31,9 +31,20 @@ jobs:
       - name: Build Spring Boot project
         run: mvn install -DskipTests=true
 
-      - name: Deploy JAR
+      - name: Run JAR with env
         run: |
           pkill -f 'demo-0.0.1-SNAPSHOT.jar' || true
           rm -rf /projects/SocialNetwork/SocialNetworkBE/*
           cp -r target/* /projects/SocialNetwork/SocialNetworkBE/
-          nohup java -jar /projects/SocialNetwork/SocialNetworkBE/demo-0.0.1-SNAPSHOT.jar.jar &
+          cd /projects/SocialNetwork/SocialNetworkBE
+          echo "Starting app with envs..."
+          printenv | grep SPRING_
+          nohup env \
+            SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL \
+            SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME \
+            SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD \
+            SPRING_MAIL_USERNAME=$SPRING_MAIL_USERNAME \
+            SPRING_MAIL_PASSWORD=$SPRING_MAIL_PASSWORD \
+            GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET \
+            JWT_SECRET=$JWT_SECRET \
+            java -jar demo-0.0.1-SNAPSHOT.jar > output.log 2>&1 &
