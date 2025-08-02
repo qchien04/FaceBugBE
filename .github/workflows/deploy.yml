@@ -9,29 +9,22 @@ jobs:
     runs-on: [self-hosted, be-runner]
     environment: spring-env
 
-    env:
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
-      SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
-      SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-      SPRING_MAIL_USERNAME: ${{ secrets.SPRING_MAIL_USERNAME }}
-      SPRING_MAIL_PASSWORD: ${{ secrets.SPRING_MAIL_PASSWORD }}
-      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
-
-      - name: Check env values
-        run: |
-          echo "SPRING_DATASOURCE_URL: $SPRING_DATASOURCE_URL"
-          echo "SPRING_DATASOURCE_USERNAME: $SPRING_DATASOURCE_USERNAME"
-          echo "JWT_SECRET: $JWT_SECRET"
 
       - name: Build Spring Boot project
         run: mvn install -DskipTests=true
 
       - name: Deploy JAR
+        env:
+          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SPRING_MAIL_USERNAME: ${{ secrets.SPRING_MAIL_USERNAME }}
+          SPRING_MAIL_PASSWORD: ${{ secrets.SPRING_MAIL_PASSWORD }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: |
           pkill -f 'demo-0.0.1-SNAPSHOT.jar' || true
           rm -rf /projects/SocialNetwork/SocialNetworkBE/*
