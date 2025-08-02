@@ -31,20 +31,26 @@ jobs:
       - name: Build Spring Boot project
         run: mvn install -DskipTests=true
 
-      - name: Run JAR with env
+      - name: Deploy and run JAR with environment variables
         run: |
           pkill -f 'demo-0.0.1-SNAPSHOT.jar' || true
           rm -rf /projects/SocialNetwork/SocialNetworkBE/*
-          cp -r target/* /projects/SocialNetwork/SocialNetworkBE/
+          cp target/*.jar /projects/SocialNetwork/SocialNetworkBE/
           cd /projects/SocialNetwork/SocialNetworkBE
-          echo "Starting app with envs..."
-          printenv | grep SPRING_
-          nohup env \
-            SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL \
-            SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME \
-            SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD \
-            SPRING_MAIL_USERNAME=$SPRING_MAIL_USERNAME \
-            SPRING_MAIL_PASSWORD=$SPRING_MAIL_PASSWORD \
-            GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET \
-            JWT_SECRET=$JWT_SECRET \
-            java -jar demo-0.0.1-SNAPSHOT.jar > output.log 2>&1 &
+
+          echo "Checking environment variables..."
+          echo "SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL"
+          echo "SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME"
+          echo "JWT_SECRET=$JWT_SECRET"
+          echo "Running app..."
+
+          nohup bash -c "
+            export SPRING_DATASOURCE_URL='${SPRING_DATASOURCE_URL}' &&
+            export SPRING_DATASOURCE_USERNAME='${SPRING_DATASOURCE_USERNAME}' &&
+            export SPRING_DATASOURCE_PASSWORD='${SPRING_DATASOURCE_PASSWORD}' &&
+            export SPRING_MAIL_USERNAME='${SPRING_MAIL_USERNAME}' &&
+            export SPRING_MAIL_PASSWORD='${SPRING_MAIL_PASSWORD}' &&
+            export GOOGLE_CLIENT_SECRET='${GOOGLE_CLIENT_SECRET}' &&
+            export JWT_SECRET='${JWT_SECRET}' &&
+            java -jar demo-0.0.1-SNAPSHOT.jar
+          " > output.log 2>&1 
