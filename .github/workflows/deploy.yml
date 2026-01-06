@@ -1,36 +1,45 @@
-name: CI/CD for Spring Boot
+name: Spring Boot CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: [ "main" ]
 
 jobs:
-  build-and-deploy:
-    runs-on: [self-hosted, be-runner]
-    environment: spring-env
+  build-and-push:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-      - name: Build Spring Boot project
-        run: mvn install -DskipTests=true
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Deploy JAR
-        run: |
-          export SPRING_DATASOURCE_URL="${{ secrets.SPRING_DATASOURCE_URL }}"
-          export SPRING_DATASOURCE_USERNAME="${{ secrets.SPRING_DATASOURCE_USERNAME }}"
-          export SPRING_DATASOURCE_PASSWORD="${{ secrets.SPRING_DATASOURCE_PASSWORD }}"
-          export JWT_SECRET="${{ secrets.JWT_SECRET }}"
-          export SPRING_MAIL_USERNAME="${{ secrets.SPRING_MAIL_USERNAME }}"
-          export SPRING_MAIL_PASSWORD="${{ secrets.SPRING_MAIL_PASSWORD }}"
-          export GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}"
+      - name: Build & Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            dockerhub_username/socialnetwork-backend:latest
+            dockerhub_username/socialnetwork-backend:${{ github.sha }}
 
-          pkill -f 'demo-0.0.1-SNAPSHOT.jar' || true
-          rm -rf /projects/SocialNetwork/SocialNetworkBE/*
-          cp -r target/* /projects/SocialNetwork/SocialNetworkBE/
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
 
-          cd /projects/SocialNetwork/SocialNetworkBE
-          nohup java -jar demo-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-          sleep 60
-          ps aux | grep demo || echo "Process not found"
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /projects/FaceBugBE
+            docker compose pull
+            docker compose up -d
+            docker image prune -f

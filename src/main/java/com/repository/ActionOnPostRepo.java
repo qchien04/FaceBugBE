@@ -20,7 +20,7 @@ public interface ActionOnPostRepo extends JpaRepository<ActionOnPost,Integer> {
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM action_on_post WHERE time_action < NOW() - INTERVAL '2 days'", nativeQuery = true)
+    @Query("DELETE FROM ActionOnPost a WHERE a.timeAction < CURRENT_TIMESTAMP")
     void deleteOlderThan2Days();
 
 

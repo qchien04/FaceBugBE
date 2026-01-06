@@ -18,10 +18,10 @@ import java.util.List;
 public interface PostRankingRepo extends JpaRepository<PostRanking,Integer> {
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM post_ranking WHERE time_calculator < NOW() - INTERVAL '6 days'", nativeQuery = true)
+    @Query(value = "DELETE FROM post_ranking WHERE time_calculator < NOW()", nativeQuery = true)
     void deleteOlderThan6Days();
 
-    @Query(value = "SELECT COUNT(*) FROM post_ranking WHERE time_calculator > NOW() - INTERVAL '6 days'", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM post_ranking WHERE time_calculator > NOW()", nativeQuery = true)
     int countEligiblePosts();
 
     @Query(value = """   
