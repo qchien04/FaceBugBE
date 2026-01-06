@@ -24,8 +24,8 @@ jobs:
           context: .
           push: true
           tags: |
-            dockerhub_username/socialnetwork-backend:latest
-            dockerhub_username/socialnetwork-backend:${{ github.sha }}
+            chien147/socialnetwork-backend:latest
+            chien147/socialnetwork-backend:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
