@@ -28,6 +28,7 @@ services:
       SPRING_MAIL_USERNAME: chien1472k4@gmail.com
       SPRING_MAIL_PASSWORD: ycpz woln cqtl ygde
       GOOGLE_CLIENT_SECRET: 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
+      REDIRECT_GOOGLE: http://localhost:8080/api/login/oauth2/code/google
       JWT_SECRET: qazxsdrftgsbhdasgbhnjfksijdfbdfdfdfsdfsfsdffsdfsdfsdfsdgfgjdjhukdmyhargadsgsdfgdfgsgerghfbsdfdsstdsvsdgsdgsdgshfvbdrg
     volumes:
       - ./uploads:/app/uploads

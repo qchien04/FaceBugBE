@@ -31,16 +31,16 @@ public class JwtTokenValidator extends OncePerRequestFilter {
         String jwt=request.getHeader("Authorization");
         String path = request.getRequestURI();
         System.out.println(path+" ne");
-        if (!path.startsWith("/google/login/user")
-                &&!path.startsWith("/auth/signup")
-                &&!path.startsWith("/auth/signin")
-                &&!path.startsWith("/auth/authAccount")
-                &&!path.startsWith("/videos/")
-                &&!path.startsWith("/public")
-                &&!path.startsWith("/favicon.ico")
-                &&!path.startsWith("/sse/")
-                &&!path.startsWith("/ws")
-                &&!path.startsWith("/sockjs")){
+        if (!path.startsWith("/api/google/login/user")
+                &&!path.startsWith("/api/auth/signup")
+                &&!path.startsWith("/api/auth/signin")
+                &&!path.startsWith("/api/auth/authAccount")
+                &&!path.startsWith("/api/videos/")
+                &&!path.startsWith("/api/public")
+                &&!path.startsWith("/api/favicon.ico")
+                &&!path.startsWith("/api/sse/")
+                &&!path.startsWith("/api/ws")
+                &&!path.startsWith("/api/sockjs")){
 
             System.out.println("Du dieu kien");
             if(jwt!=null && jwt.startsWith("Bearer ")){
